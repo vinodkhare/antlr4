@@ -79,6 +79,8 @@ antlr4/4.6-SNAPSHOT/antlr4-4.6-SNAPSHOT-tests.jar
 antlr4/4.6-SNAPSHOT/antlr4-4.6-SNAPSHOT.jar
 ```
 
+The ANTLR complete JAR is generated in `antlr4\tool\target`.
+
 Note that ANTLR is written in itself, which is why maven downloads antlr4-4.5.jar for boostrapping 4.6-SNAPSHOT purposes.
 
 # Testing tool and targets
