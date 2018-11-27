@@ -120,7 +120,7 @@ public class TestRig {
 		}
 	}
 
-	public void process() throws Exception {
+	public String process() throws Exception {
 //		System.out.println("exec "+grammarName+"."+startRuleName);
 		String lexerName = grammarName+"Lexer";
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -135,8 +135,7 @@ public class TestRig {
 				lexerClass = cl.loadClass(lexerName).asSubclass(Lexer.class);
 			}
 			catch (ClassNotFoundException cnfe2) {
-				System.err.println("Can't load "+lexerName+" as lexer or parser");
-				return;
+				return "Can't load "+lexerName+" as lexer or parser";
 			}
 		}
 
@@ -155,19 +154,20 @@ public class TestRig {
 		Charset charset = ( encoding == null ? Charset.defaultCharset () : Charset.forName(encoding) );
 		if ( inputFiles.size()==0 ) {
 			CharStream charStream = CharStreams.fromStream(System.in, charset);
-			process(lexer, parserClass, parser, charStream);
-			return;
+			return process(lexer, parserClass, parser, charStream);
 		}
 		for (String inputFile : inputFiles) {
 	                CharStream charStream = CharStreams.fromPath(Paths.get(inputFile), charset);
 			if ( inputFiles.size()>1 ) {
-				System.err.println(inputFile);
+				return inputFile;
 			}
-			process(lexer, parserClass, parser, charStream);
+			return process(lexer, parserClass, parser, charStream);
 		}
+
+		return null;
 	}
 
-	protected void process(Lexer lexer, Class<? extends Parser> parserClass, Parser parser, CharStream input) throws IOException, IllegalAccessException, InvocationTargetException, PrintException {
+	protected String process(Lexer lexer, Class<? extends Parser> parserClass, Parser parser, CharStream input) throws IOException, IllegalAccessException, InvocationTargetException, PrintException {
 			lexer.setInputStream(input);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 
@@ -184,7 +184,7 @@ public class TestRig {
 				}
 			}
 
-			if ( startRuleName.equals(LEXER_START_RULE_NAME) ) return;
+			if ( startRuleName.equals(LEXER_START_RULE_NAME) ) return null;
 
 			if ( diagnostics ) {
 				parser.addErrorListener(new DiagnosticErrorListener());
@@ -207,7 +207,7 @@ public class TestRig {
 				ParserRuleContext tree = (ParserRuleContext)startRule.invoke(parser, (Object[])null);
 
 				if ( printTree ) {
-					System.out.println(tree.toStringTree(parser));
+					return tree.toStringTree(parser);
 				}
 				if ( gui ) {
 					Trees.inspect(tree, parser);
@@ -217,7 +217,9 @@ public class TestRig {
 				}
 			}
 			catch (NoSuchMethodException nsme) {
-				System.err.println("No method for rule "+startRuleName+" or it has arguments");
+				return "No method for rule "+startRuleName+" or it has arguments";
 			}
+
+			return null;
 		}
 }
